@@ -1,9 +1,13 @@
 package Getopt::Sane;
 
+# ABSTRACT: Yet another casual command line option parser.
+
 use v5.18;
 use Carp ();
 use List::MoreUtils qw/all/;
 use Mouse::Util::TypeConstraints;
+
+our $VERSION = 0.01;
 
 sub new {
     my ($class, %descriptions) = @_;
