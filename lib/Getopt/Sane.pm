@@ -25,6 +25,14 @@ sub new {
 
 sub aliases { $_[0]->{aliases} }
 
+sub assert_defined_option_name {
+    my ($self, $option_name) = @_;
+
+    unless ($self->resolve_option_name($option_name)) {
+        Carp::croak("Undefined option: $option_name");
+    }
+}
+
 sub descriptions { $_[0]->{descriptions} }
 
 sub options {
@@ -74,10 +82,13 @@ sub parse {
         my ($option_name, $value);
         if ($arg =~ /^--no-(.+)$/) {
             ($option_name, $value) = ($1 => 0);
+            $self->assert_defined_option_name($option_name);
         } elsif ($arg =~ /^--([^=]+)=(.+)$/) {
             ($option_name, $value) = ($1 => $2);
+            $self->assert_defined_option_name($option_name);
         } elsif ($arg =~ /^--(.+)$/ or $arg =~ /^-(.)$/) {
             $option_name = $1;
+            $self->assert_defined_option_name($option_name);
             my $type_constraint_name =
                 $self->type_constraint_for($option_name)->name;
             if ($type_constraint_name eq 'Bool') {
@@ -89,6 +100,7 @@ sub parse {
             }
         } elsif ($arg =~ /^-.{2,}$/) {
             my $looks_like_clustered_switches = all {
+                $self->assert_defined_option_name($_);
                 my $canonical_name = $self->resolve_option_name($_);
                 defined $canonical_name
                     and $self->type_constraint_for($_)->name eq 'Bool';
